@@ -569,7 +569,7 @@ ChimeraDbV3Viewer.prototype.drawChromosomeLabels = function(chromosomes) {
 * Band labels are text like "p11.11".
 * Stalks are small lines that visually connect labels to their bands.
 */
-ChimeraDbV3Viewer.prototype.drawBandLabels = function(chromosomes) {
+ChimeraDbV3Viewer.prototype.drawBandLabels = function(chromosomes, chrs2) {
 
   var i, chr, chrs, taxid, ideo,
       chrMargin2;
@@ -579,10 +579,12 @@ ChimeraDbV3Viewer.prototype.drawBandLabels = function(chromosomes) {
   chrs = [];
 
   for (taxid in chromosomes) {
-    for (chr in chromosomes[taxid]) {
-      chrs.push(chromosomes[taxid][chr]);
-    }
+      for( chr in chrs2 ) {
+        chrs.push(chromosomes[taxid][chrs2[chr]]);
+      }
   }
+
+console.log( chrs );
 
   var textOffsets = {};
 
@@ -2233,6 +2235,31 @@ ChimeraDbV3Viewer.prototype.sortChromosomesByName = function(chromosomes) {
 
 }
 
+ChimeraDbV3Viewer.prototype.sortChromosomesByName = function(chromosomes) {
+
+  var ideo = this;
+
+  return chromosomes.sort(function(a, b) {
+
+    var a = a.name,
+        b = b.name,
+        isANumeric = ideo.isNumber(a),
+        isBNumeric = ideo.isNumber(b);
+
+    if (isANumeric) a = parseInt(a, 10);
+    if (isBNumeric) b = parseInt(b, 10);
+
+    if (isANumeric && isBNumeric) {
+        return a - b;
+    } else if (!isANumeric && !isBNumeric){
+      return (a > b) ? 1 : -1;
+    } else {
+      return (isANumeric === false) ? 1 : -1;
+    }
+  });
+
+}
+
 
 /**
   Returns names and lengths of chromosomes for an organism's best-known
@@ -2359,9 +2386,8 @@ ChimeraDbV3Viewer.prototype.initDrawChromosomes = function(bandsArray) {
     }
 
     if (ideo.config.showBandLabels === true) {
-        ideo.drawBandLabels(ideo.chromosomes);
+        ideo.drawBandLabels(ideo.chromosomes, chrs);
     }
-
   }
 };
 
@@ -2550,7 +2576,6 @@ ChimeraDbV3Viewer.prototype.init = function() {
 
     var t0_b = new Date().getTime();
     for (j = 0; j < taxids.length; j++) {
-
       taxid = taxids[j];
       bandData = ideo.bandData[taxid];
       if (ideo.config.multiorganism) {
@@ -2558,7 +2583,7 @@ ChimeraDbV3Viewer.prototype.init = function() {
       }
       bandsByChr = ideo.getBands(bandData, taxid, chrs);
 
-      chrs = Object.keys(bandsByChr);
+//      chrs = Object.keys(bandsByChr);
 
       ideo.config.chromosomes[taxid] = chrs.slice();
 
