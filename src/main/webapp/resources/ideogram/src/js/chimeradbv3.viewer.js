@@ -569,7 +569,7 @@ ChimeraDbV3Viewer.prototype.drawChromosomeLabels = function(chromosomes) {
 * Band labels are text like "p11.11".
 * Stalks are small lines that visually connect labels to their bands.
 */
-ChimeraDbV3Viewer.prototype.drawBandLabels = function(chromosomes) {
+ChimeraDbV3Viewer.prototype.drawBandLabels = function(chromosomes, chrNos) {
 
   var i, chr, chrs, taxid, ideo,
       chrMargin2;
@@ -578,9 +578,10 @@ ChimeraDbV3Viewer.prototype.drawBandLabels = function(chromosomes) {
 
   chrs = [];
 
+
   for (taxid in chromosomes) {
-    for (chr in chromosomes[taxid]) {
-      chrs.push(chromosomes[taxid][chr]);
+    for( chr in chrNos ) {
+      chrs.push(chromosomes[taxid][ chrNos[chr] ]);
     }
   }
 
@@ -2359,7 +2360,7 @@ ChimeraDbV3Viewer.prototype.initDrawChromosomes = function(bandsArray) {
     }
 
     if (ideo.config.showBandLabels === true) {
-        ideo.drawBandLabels(ideo.chromosomes);
+        ideo.drawBandLabels(ideo.chromosomes, chrs);
     }
 
   }
@@ -2558,7 +2559,7 @@ ChimeraDbV3Viewer.prototype.init = function() {
       }
       bandsByChr = ideo.getBands(bandData, taxid, chrs);
 
-      chrs = Object.keys(bandsByChr);
+//      chrs = Object.keys(bandsByChr);
 
       ideo.config.chromosomes[taxid] = chrs.slice();
 
