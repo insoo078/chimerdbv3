@@ -16,7 +16,7 @@ var Ideogram = function(config) {
   this.debug = false;
 
   if (!this.config.bandDir) {
-    this.config.bandDir = "../../data/bands/";
+    this.config.bandDir = "resources/ideogram/data/bands/";
   }
 
   if (!this.config.container) {
