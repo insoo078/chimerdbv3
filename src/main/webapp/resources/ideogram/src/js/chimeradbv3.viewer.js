@@ -625,7 +625,11 @@ ChimeraDbV3Viewer.prototype.drawBandLabels = function(chromosomes, chrNos) {
           x = ideo.round(-8 + d.px.start + d.px.width/2);
 
           textOffsets[chrModel.id].push(x + 13);
-          y = chrMargin - 10;
+//          if( i <= 0 ) {
+            y = chrMargin - 10;
+//          }else {
+//            y = chrMargin + ideo.config.chrWidth;
+//          }
 
           return "translate(" + x + "," + y + ")";
         })
