@@ -4,10 +4,22 @@
 
 <html>
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>JSP Page</title>
+       <link type="text/css" rel="stylesheet" href="./resources/css/ideogram/ideogram.css"/>
+       <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+       <script type="text/javascript" src="./resources/js/ideogram/ideogram.js"></script>
     </head>
     <body>
-        <h1>Hello World!</h1>
+         <h1>Human | Ideogram</h1>
+  <a href=".">Back to overview</a>
+  <script type="text/javascript">
+    var ideogram = new Ideogram({
+      organism: "human"
+    });
+    
+    console.log( ideogram );
+
+  </script>
     </body>
 </html>
