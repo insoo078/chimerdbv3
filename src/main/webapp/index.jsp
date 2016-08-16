@@ -4,12 +4,14 @@
   <title>Human | Ideogram</title>
   <link type="text/css" rel="stylesheet" href="resources/ideogram/src/css/ideogram.css"/>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.1.1/d3.min.js"></script>
-  <script type="text/javascript" src="resources/ideogram/src/js/ideogram.js"></script>
+  <script type="text/javascript" src="resources/ideogram/src/js/chimeradbv3.viewer.js"></script>
 </head>
 <body>
   <h1>Human | Ideogram</h1>
   <a href=".">Back to overview</a>
   
+  <div id='chimer-seq-viewer'></div>
+
   <script type="text/javascript">
 
     	function onIdeogramLoad() {
@@ -73,6 +75,13 @@
 		ideogram.drawSynteny(syntenicRegions);
 
 	}
+        
+        
+          var annotationTracks = [
+        {"id": "pathogenicTrack", "displayName": "Pathogenic", "color": "#F00"},
+        {"id": "uncertainSignificanceTrack", "displayName": "Uncertain significance", "color": "#CCC"},
+        {"id": "benignTrack",  "displayName": "Benign", "color": "#8D4"}
+        ]
 
 // BCR (NC_000022.11)
 // ABL1 (NC_000009.12)
@@ -82,15 +91,21 @@
 	  chromosomes: ["22", "9"],
 	  chrMargin: 100,
           chrHeight: 1280,
+          chrWidth: 20,
 	  showBandLabels: true,
           brush: true,
-          container: "body",
-          rows : 10
+          container: "chimer-seq-viewer",
+//          rows : 10,
+//          annotationsPath: "./resources/ideogram/data/annotations/all_human_genes.json",
+//          annotationTracks: annotationTracks,
+//          annotationHeight: 3.5
+//          
+//          
 //	  perspective: "comparative"
 //	  onLoad: onIdeogramLoad
 	};
 
-	var ideogram = new Ideogram(config);
+	var viewer = new ChimeraDbV3Viewer(config);
 
   </script>
 </body>
