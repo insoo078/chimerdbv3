@@ -30,7 +30,7 @@ var ChimeraDbV3Viewer = function(config) {
   }
 
   if (!this.config.orientation) {
-    var orientation = "vertical";
+    var orientation = "horizontal";
     this.config.orientation = orientation;
   }
 
@@ -39,13 +39,9 @@ var ChimeraDbV3Viewer = function(config) {
           container = this.config.container,
           rect = document.querySelector(container).getBoundingClientRect();
 
-      if (orientation === "vertical") {
-        chrHeight = rect.height;
-      } else {
         chrHeight = rect.width;
-      }
 
-      if (container == "body") {
+      if (container === "body") {
         chrHeight = 500;
       }
       this.config.chrHeight = chrHeight;
@@ -83,6 +79,10 @@ var ChimeraDbV3Viewer = function(config) {
 
   if (config.showBandLabels) {
     this.config.chrMargin += 20;
+  }
+  
+  if( config.topMargin ) {
+      this.config.topMargin = 20;
   }
  
   if (config.chromosome) {
@@ -138,7 +138,7 @@ var ChimeraDbV3Viewer = function(config) {
       "assemblies": { // technically, primary assembly unit of assembly
         "default": "GCF_000001305.14", // GRCh38
         "GRCh38": "GCF_000001305.14",
-        "GRCh37": "GCF_000001305.13",
+        "GRCh37": "GCF_000001305.13"
       }
     },
     "10090": {
@@ -187,7 +187,7 @@ ChimeraDbV3Viewer.prototype.getBands = function(content, taxid, chromosomes) {
 
   var lines = {},
       delimiter, tsvLines, columns, line, stain, chr,
-      i, prefetched, init, tsvLinesLength, source,
+      i, init, tsvLinesLength, source,
       start, stop, firstColumn;
 
   if (content.slice(0, 8) === "chrBands") {
@@ -209,9 +209,9 @@ ChimeraDbV3Viewer.prototype.getBands = function(content, taxid, chromosomes) {
   }
 
   firstColumn = tsvLines[0].split(delimiter)[0];
-  if (firstColumn == '#chromosome') {
+  if (firstColumn === '#chromosome') {
     source = 'ncbi';
-  } else if (firstColumn == '#chrom'){
+  } else if (firstColumn === '#chrom'){
     source = 'ucsc';
   } else {
     source = 'native';
@@ -268,6 +268,7 @@ ChimeraDbV3Viewer.prototype.getBands = function(content, taxid, chromosomes) {
       lines[chr].push(line);
 
     }
+
   } else if (source === 'ucsc') {
     for (i = init; i < tsvLinesLength; i++) {
 
@@ -440,7 +441,7 @@ ChimeraDbV3Viewer.prototype.getChromosomeModel = function(bands, chromosomeName,
   chr["bands"] = bands;
 
   chr["centromerePosition"] = "";
-  if (bands[0].bp.stop - bands[0].bp.start == 1) {
+  if (bands[0].bp.stop - bands[0].bp.start === 1) {
     // As with mouse
     chr["centromerePosition"] = "telocentric";
 
@@ -467,93 +468,45 @@ ChimeraDbV3Viewer.prototype.drawChromosomeLabels = function(chromosomes) {
 
   chrs = ideo.chromosomesArray;
 
-  chrMargin2 = chrWidth/2 + chrMargin - 8;
-  if (ideo.config.orientation === "vertical" && ideo.config.showBandLabels === true) {
-    chrMargin2 = chrMargin + 17;
-  }
-
-  if (ideo.config.orientation === "vertical") {
+//  chrMargin2 = chrWidth/2 + chrMargin - 8;
+chrMargin2 = ideo.config.topMargin;
 
     d3.selectAll(".chromosome")
-      .append("text")
-       .data(chrs)
-        .attr("class", "chrLabel")
-        .attr("transform", "rotate(-90)")
-        .attr("y", -16)
-        .each(function (d, i) {
+       .append("text")
+        .data(chrs)
+         .attr("class", "chrLabel")
+         .attr("x", -5)
+         .each(function (chr, i) {
 
-          var i, chrMarginI, x, cls;
-          var arr = d.name.split(" ");
-          var lines = [];
+           var i, chrMarginI, y, cls;
 
-          if (arr != undefined) {
-              lines.push(arr.slice(0, arr.length - 1).join(" "));
-              lines.push(arr[arr.length - 1]);
+           var arr = chr.name.split(" ");
+           var lines = [];
 
-              if (!ideo.config.showBandLabels) {
-                i += 1;
-              }
+           if (arr !== undefined) {
+               lines.push(arr.slice(0, arr.length - 1).join(" "));
+               lines.push(arr[arr.length - 1]);
 
-              chrMarginI = chrMargin * i;
-              x = -(chrMarginI + chrMargin2 - chrWidth - 2) + ideo.config.annotTracksHeight * 2;
+               chrMarginI = chrMargin * i;
+               y = (chrMarginI + chrMargin2);
 
-              for (var i = 0; i < lines.length; i++) {
+               for (var i = 0; i < lines.length; i++) {
 
-                  cls = "";
-                  if (i == 0 && ideo.config.fullChromosomeLabels) {
-                    cls = "italic";
-                  }
+                   cls = "";
+                   if (i === 0 && ideo.config.fullChromosomeLabels) {
+                     cls = "italic";
+                   }
 
-                  d3.select(this).append("tspan")
-                    .text(lines[i])
-                    .attr("dy", i ? "1.2em" : 0)
-                    .attr("x", x)
-                    .attr("text-anchor", "middle")
-                    .attr("class", cls);
-              }
-          }
-        });
-
-  } else {
-
-     d3.selectAll(".chromosome")
-        .append("text")
-         .data(chrs)
-          .attr("class", "chrLabel")
-          .attr("x", -5)
-          .each(function (d, i) {
-
-            var i, chrMarginI, y, cls;
-
-            var arr = d.name.split(" ");
-            var lines = [];
-
-            if (arr != undefined) {
-                lines.push(arr.slice(0, arr.length - 1).join(" "));
-                lines.push(arr[arr.length - 1]);
-
-                chrMarginI = chrMargin * i;
-                y = (chrMarginI + chrMargin2);
-
-                for (var i = 0; i < lines.length; i++) {
-
-                    cls = "";
-                    if (i == 0 && ideo.config.fullChromosomeLabels) {
-                      cls = "italic";
-                    }
-
-                    d3.select(this).append("tspan")
-                      .text(lines[i])
-                      .attr("dy", i ? "1.2em" : 0)
-                      .attr("y", y)
-                      .attr("x", -8)
-                      .attr("text-anchor", "middle")
-                      .attr("class", cls);
-                }
-            }
-          });
-
-  }
+                   d3.select(this).append("tspan")
+                     .text(lines[i])
+                     .attr("dy", i ? "1.2em" : 0)
+                     .attr("y", y)
+                     .attr("x", -8)
+                     .attr("text-anchor", "middle")
+                     .attr("class", cls);
+               }
+           }
+         });
 
 };
 
@@ -565,13 +518,11 @@ ChimeraDbV3Viewer.prototype.drawChromosomeLabels = function(chromosomes) {
 */
 ChimeraDbV3Viewer.prototype.drawBandLabels = function(chromosomes, chrNos) {
 
-  var i, chr, chrs, taxid, ideo,
-      chrMargin2;
+  var i, chr, chrs, taxid, ideo;
 
   ideo = this;
 
   chrs = [];
-
 
   for (taxid in chromosomes) {
     for( chr in chrNos ) {
@@ -581,26 +532,23 @@ ChimeraDbV3Viewer.prototype.drawBandLabels = function(chromosomes, chrNos) {
 
   var textOffsets = {};
 
-  chrIndex = 0;
+//  chrIndex = 0;
   for (var i = 0; i < chrs.length; i++) {
 
-    chrIndex += 1;
+//    chrIndex += 1;
 
     chrModel = chrs[i];
 
     chr = d3.select("#" + chrModel.id);
 
-    var chrMargin = this.config.chrMargin * chrIndex,
+    var chrMargin = this.config.chrMargin * chrModel.chrIndex,
         lineY1, lineY2,
         ideo = this;
 
     lineY1 = chrMargin;
     lineY2 = chrMargin - 8;
 
-    if (
-      chrIndex == 1 &&
-      "perspective" in this.config && this.config.perspective == "comparative"
-    ) {
+    if ( chrModel.chrIndex === 0 && "perspective" in this.config && this.config.perspective === "comparative" ) {
       lineY1 += 18;
       lineY2 += 18;
     }
@@ -624,6 +572,7 @@ ChimeraDbV3Viewer.prototype.drawBandLabels = function(chromosomes, chrNos) {
           }else {
             y = chrMargin + ideo.config.chrWidth + 18;
           }
+          y += ideo.config.topMargin;
 
           return "translate(" + x + "," + y + ")";
         })
@@ -641,9 +590,9 @@ ChimeraDbV3Viewer.prototype.drawBandLabels = function(chromosomes, chrNos) {
       })
         .append("line")
         .attr("x1", 0)
-        .attr("y1", i<=0?0:ideo.config.chrWidth)
+        .attr("y1", i<=0?0+ideo.config.topMargin:ideo.config.chrWidth+ideo.config.topMargin)
         .attr("x2", 0)
-        .attr("y2", i<=0?-8:ideo.config.chrWidth + 8);
+        .attr("y2", i<=0?-8+ideo.config.topMargin:ideo.config.chrWidth + 8+ideo.config.topMargin);
   }
 
   for (var i = 0; i < chrs.length; i++) {
@@ -719,157 +668,6 @@ ChimeraDbV3Viewer.prototype.drawBandLabels = function(chromosomes, chrNos) {
 
 };
 
-/**
-* Rotates chromosome labels by 90 degrees, e.g. upon clicking a chromosome to focus.
-*/
-ChimeraDbV3Viewer.prototype.rotateChromosomeLabels = function(chr, chrIndex, orientation, scale) {
-
-  var chrMargin, chrWidth, ideo, x, y,
-      numAnnotTracks, scaleSvg, tracksHeight;
-
-  chrWidth = this.config.chrWidth;
-  chrMargin = this.config.chrMargin * chrIndex;
-  numAnnotTracks = this.config.numAnnotTracks;
-
-  ideo = this;
-
-  if (typeof(scale) !== "undefined" && scale.hasOwnProperty("x") && !(scale.x == 1 && scale.y == 1)) {
-    scaleSvg = "scale(" + scale.x + "," + scale.y + ")";
-    x = -6;
-    y = (scale === "" ? -16 : -14);
-  } else {
-    x = -8;
-    y = -16;
-    scale = {"x": 1, "y": 1};
-    scaleSvg = "";
-  }
-
-  if (orientation == "vertical" || orientation == "") {
-
-    chr.selectAll("text.chrLabel")
-      .attr("transform", scaleSvg)
-      .selectAll("tspan")
-        .attr("x", x)
-        .attr("y", function(d, i) {
-
-          var ci = chrIndex - 1;
-
-          if (numAnnotTracks > 1 || orientation == "") {
-            ci -= 1;
-          }
-
-          chrMargin2 = -4;
-          if (ideo.config.showBandLabels === true) {
-            chrMargin2 = ideo.config.chrMargin + chrWidth + 26;
-          }
-
-          var chrMargin = ideo.config.chrMargin * ci;
-
-          if (numAnnotTracks > 1 == false) {
-            chrMargin += 1;
-          }
-
-          return chrMargin + chrMargin2;
-        });
-
-  } else {
-
-    chrIndex -= 1;
-
-    chrMargin2 = -chrWidth - 2;
-    if (ideo.config.showBandLabels === true) {
-      chrMargin2 = ideo.config.chrMargin + 8;
-    }
-
-    tracksHeight = ideo.config.annotTracksHeight;
-    if (ideo.config.annotationsLayout !== "overlay") {
-      tracksHeight = tracksHeight * 2;
-    }
-
-    chr.selectAll("text.chrLabel")
-      .attr("transform", "rotate(-90)" + scaleSvg)
-      .selectAll("tspan")
-      .attr("x", function(d, i) {
-
-        chrMargin = ideo.config.chrMargin * chrIndex;
-        x = -(chrMargin + chrMargin2) + 3 + tracksHeight;
-        x = x/scale.x;
-        return x;
-      })
-      .attr("y", y);
-
-  }
-
-};
-
-/**
-* Rotates band labels by 90 degrees, e.g. upon clicking a chromosome to focus.
-*
-* This method includes proportional scaling, which ensures that
-* while the parent chromosome group is scaled strongly in one dimension to fill
-* available space, the text in the chromosome's band labels is
-* not similarly distorted, and remains readable.
-*/
-ChimeraDbV3Viewer.prototype.rotateBandLabels = function(chr, chrIndex, scale) {
-
-  var chrMargin, chrWidth, scaleSvg,
-      orientation, bandLabels,
-      ideo = this;
-
-  bandLabels = chr.selectAll(".bandLabel");
-
-  chrWidth = this.config.chrWidth;
-  chrMargin = this.config.chrMargin * chrIndex;
-
-  orientation = chr.attr("data-orientation");
-
-  if (typeof(scale) == "undefined") {
-    scale = {x: 1, y: 1};
-    scaleSvg = "";
-  } else {
-    scaleSvg = "scale(" + scale.x + "," + scale.y + ")";
-  }
-
-  if (
-    chrIndex == 1 &&
-    "perspective" in this.config && this.config.perspective == "comparative"
-  ) {
-    bandLabels
-      .attr("transform", function(d) {
-        var x, y;
-        x = (8 - chrMargin) - 26;
-        y = ideo.round(2 + d.px.start + d.px.width/2);
-        return "rotate(-90)translate(" + x + "," + y + ")";
-      })
-      .selectAll("text")
-        .attr("text-anchor", "end");
-  } else if (orientation == "vertical")  {
-    bandLabels
-      .attr("transform", function(d) {
-        var x, y;
-        x = 8 - chrMargin;
-        y = ideo.round(2 + d.px.start + d.px.width/2);
-        return "rotate(-90)translate(" + x + "," + y + ")";
-      })
-      .selectAll("text")
-        .attr("transform", scaleSvg);
-  } else {
-    bandLabels
-      .attr("transform", function(d) {
-        var x, y;
-        x = ideo.round(-8*scale.x + d.px.start + d.px.width/2);
-        y = chrMargin - 10;
-        return "translate(" + x + "," + y + ")";
-      })
-      .selectAll("text")
-        .attr("transform", scaleSvg);
-
-    chr.selectAll(".bandLabelStalk line")
-      .attr("transform", scaleSvg);
-  }
-
-};
-
 ChimeraDbV3Viewer.prototype.round = function(coord) {
   // Rounds an SVG coordinates to two decimal places
   // e.g. 42.1234567890 -> 42.12
@@ -883,18 +681,15 @@ ChimeraDbV3Viewer.prototype.round = function(coord) {
 ChimeraDbV3Viewer.prototype.drawChromosome = function(chrModel, chrIndex) {
 
   var chr, chrWidth, width,
-      pArmWidth, selector, qArmStart, qArmWidth,
-      pTerPad, chrClass,
-      annotHeight, numAnnotTracks, annotTracksHeight,
-      bump, ideo,
-      bumpTweak, borderTweak;
+      pArmWidth, qArmStart, qArmWidth,
+      pTerPad, bump, ideo, borderTweak;
 
   ideo = this;
 
   bump = ideo.bump;
 
   // p-terminal band padding
-  if (chrModel.centromerePosition != "telocentric") {
+  if (chrModel.centromerePosition !== "telocentric") {
     pTerPad = bump;
   } else {
     pTerPad = Math.round(bump/4) + 3;
@@ -908,7 +703,7 @@ ChimeraDbV3Viewer.prototype.drawChromosome = function(chrModel, chrIndex) {
   chrWidth = ideo.config.chrWidth;
   width = chrModel.width;
 
-  var chrMargin = ideo.config.chrMargin * chrIndex;
+  var chrMargin = ideo.config.chrMargin * chrIndex + ideo.config.topMargin;
 
   // Draw chromosome bands
   chr.selectAll("path")
@@ -922,7 +717,7 @@ ChimeraDbV3Viewer.prototype.drawChromosome = function(chrModel, chrIndex) {
       })
       .attr("class", function(d) {
         var cls = "band " + d.stain;
-        if (d.stain == "acen") {
+        if (d.stain === "acen") {
           var arm = d.name[0]; // e.g. p in p11
           cls += " " + arm + "-cen";
         }
@@ -933,11 +728,11 @@ ChimeraDbV3Viewer.prototype.drawChromosome = function(chrModel, chrIndex) {
             left = ideo.round(d.px.start),
             curveStart, curveMid, curveEnd,
             curveTweak,
-            innerBump = bump;
+//            innerBump = bump;
 
         curveTweak = 0;
 
-        if (d.stain == "acen") {
+        if (d.stain === "acen") {
           // Pericentromeric bands get curved
           if (ideo.adjustedBump) {
             curveTweak = 0.35;
@@ -954,7 +749,7 @@ ChimeraDbV3Viewer.prototype.drawChromosome = function(chrModel, chrIndex) {
           curveMid = chrWidth/2 - curveTweak*2;
           curveEnd = chrWidth - curveTweak*2;
 
-          if (d.name[0] == "p") {
+          if (d.name[0] === "p") {
             // p arm
             d =
               "M " + left + " " + curveStart + " " +
@@ -977,7 +772,7 @@ ChimeraDbV3Viewer.prototype.drawChromosome = function(chrModel, chrIndex) {
         } else {
           // Normal bands
 
-          if (i == 0) {
+          if (i === 0) {
             left += pTerPad - bump/2;
             // TODO: this is a minor kludge to preserve visible
             // centromeres in mouse, when viewing mouse and
@@ -992,7 +787,7 @@ ChimeraDbV3Viewer.prototype.drawChromosome = function(chrModel, chrIndex) {
             left += 1.8;
           }
 
-          if (i == chrModel.bands.length - 1) {
+          if (i === chrModel.bands.length - 1) {
             left -= pTerPad - bump/2;
           }
 
@@ -1006,7 +801,7 @@ ChimeraDbV3Viewer.prototype.drawChromosome = function(chrModel, chrIndex) {
         return d;
       });
 
-  if (chrModel.centromerePosition != "telocentric") {
+  if (chrModel.centromerePosition !== "telocentric") {
     // As in human
     chr.append('path')
       .attr("class", "p-ter chromosomeBorder " + chrModel.bands[0].stain)
@@ -1104,200 +899,8 @@ ChimeraDbV3Viewer.prototype.drawChromosome = function(chrModel, chrIndex) {
 * Rotates and translates chromosomes upon initialization as needed.
 */
 ChimeraDbV3Viewer.prototype.initTransformChromosome = function(chr, chrIndex) {
-
-  if (this.config.orientation == "vertical") {
-
-    var chrMargin, chrWidth, tPadding;
-
-    chrWidth = this.config.chrWidth;
-    chrMargin = this.config.chrMargin * chrIndex;
-
-    if (!this.config.showBandLabels) {
-      chrIndex += 2;
-    }
-
-    tPadding = chrMargin + (chrWidth-4)*(chrIndex - 1);
-
-    chr
-      .attr("data-orientation", "vertical")
-      .attr("transform", "rotate(90, " + (tPadding - 30) + ", " + (tPadding) + ")");
-
-    this.rotateBandLabels(chr, chrIndex);
-
-  } else {
     chr.attr("data-orientation", "horizontal");
-  }
 };
-
-/**
-* Rotates a chromosome 90 degrees and shows or hides all other chromosomes
-* Useful for focusing or defocusing a particular chromosome
-*/
-ChimeraDbV3Viewer.prototype.rotateAndToggleDisplay = function(chromosomeID) {
-
-  var id, chr, chrModel, chrIndex, chrMargin, chrWidth,
-      chrHeight, ideoBox, ideoWidth, ideoHeight, scaleX, scaleY,
-      initOrientation, currentOrientation,
-      cx, cy, cy2,
-      ideo = this;
-
-  id = chromosomeID;
-
-  chr = d3.select("#" + id);
-
-  chrModel = ideo.chromosomes[ideo.config.taxid][id.split("-")[0].split("chr")[1]];
-
-  chrIndex = chrModel["chrIndex"];
-
-  otherChrs = d3.selectAll("g.chromosome").filter(function(d, i) { return this.id !== id; });
-
-  initOrientation = ideo.config.orientation;
-  currentOrientation = chr.attr("data-orientation");
-
-  chrMargin = this.config.chrMargin * chrIndex;
-  chrWidth = this.config.chrWidth;
-
-  ideoBox = d3.select("#ideogram").nodes()[0].getBoundingClientRect();
-  ideoHeight = ideoBox.height;
-  ideoWidth = ideoBox.width;
-
-  if (initOrientation == "vertical") {
-
-    chrLength = chr.nodes()[0].getBoundingClientRect().height;
-
-    scaleX = (ideoWidth/chrLength)*0.97;
-    scaleY = 1.5;
-    scale = "scale(" + scaleX + ", " + scaleY + ")";
-
-    inverseScaleX = 2/scaleX;
-    inverseScaleY = 1;
-
-    if (!this.config.showBandLabels) {
-      chrIndex += 2;
-    }
-
-    cx = chrMargin + (chrWidth-4)*(chrIndex - 1) - 30;
-    cy = cx + 30;
-
-    verticalTransform = "rotate(90, " + cx + ", " + cy + ")";
-
-    cy2 = -1*(chrMargin - this.config.annotTracksHeight)*scaleY;
-
-    if (this.config.showBandLabels) {
-      cy2 += 25;
-    }
-
-    horizontalTransform =
-      "rotate(0)" +
-      "translate(20, " + cy2 + ")" +
-      scale;
-
-  } else {
-
-    chrLength = chr.nodes()[0].getBoundingClientRect().width;
-
-    scaleX = (ideoHeight/chrLength)*0.97;
-    scaleY = 1.5;
-    scale = "scale(" + scaleX + ", " + scaleY + ")";
-
-    inverseScaleX = 2/scaleX;
-    inverseScaleY = 1;
-
-    var bandPad = 20;
-    if (!this.config.showBandLabels) {
-      chrIndex += 2;
-      bandPad = 15;
-    }
-    cx = chrMargin + (chrWidth-bandPad)*(chrIndex - 2);
-    cy = cx + 5;
-
-    if (!this.config.showBandLabels) {
-      cx += bandPad;
-      cy += bandPad;
-    }
-
-    verticalTransform = (
-      "rotate(90, " + cx + ", " + cy + ")" +
-      scale
-    );
-    horizontalTransform = "";
-
-  }
-
-  inverseScale = "scale(" + inverseScaleX + "," + inverseScaleY + ")";
-
-  if (currentOrientation != "vertical") {
-
-    if (initOrientation == "horizontal") {
-      otherChrs.style("display", "none");
-
-    }
-
-    chr.selectAll(".annot>path")
-      .attr("transform", (initOrientation == "vertical" ? "" : inverseScale));
-
-    chr
-      .attr("data-orientation", "vertical")
-      .transition()
-      .attr("transform", verticalTransform)
-      .on("end", function() {
-
-        if (initOrientation == "vertical") {
-          scale = "";
-        } else {
-          scale = {"x": inverseScaleY, "y": inverseScaleX};
-        }
-
-        ideo.rotateBandLabels(chr, chrIndex, scale);
-        ideo.rotateChromosomeLabels(chr, chrIndex, "horizontal", scale);
-
-        if (initOrientation == "vertical") {
-          otherChrs.style("display", "");
-        }
-
-      });
-
-  } else {
-
-    chr.attr("data-orientation", "");
-
-    if (initOrientation == "vertical") {
-      otherChrs.style("display", "none");
-    }
-
-    chr.selectAll(".annot>path")
-      .transition()
-      .attr("transform", (initOrientation == "vertical" ? inverseScale : ""));
-
-    chr
-      .transition()
-      .attr("transform", horizontalTransform)
-      .on("end", function() {
-
-        if (initOrientation == "horizontal") {
-          if (currentOrientation == "vertical") {
-            inverseScale = {"x": 1, "y": 1};
-          } else {
-            inverseScale = "";
-          }
-        } else {
-          inverseScale = {"x": inverseScaleX, "y": inverseScaleY};
-        }
-
-        ideo.rotateBandLabels(chr, chrIndex, inverseScale);
-        ideo.rotateChromosomeLabels(chr, chrIndex, "", inverseScale);
-
-        if (initOrientation == "horizontal") {
-          otherChrs.style("display", "");
-        }
-
-      });
-
-
-  }
-};
-
-
 
 /**
 * Converts base pair coordinates to pixel offsets.
@@ -1681,7 +1284,7 @@ ChimeraDbV3Viewer.prototype.getHistogramBars = function(annots) {
         "count": 0,
         "chrIndex": chrIndex,
         "chrName": chr,
-        "color": color,
+        "color": color
       });
     }
     bars.push(bar);
@@ -1707,7 +1310,7 @@ ChimeraDbV3Viewer.prototype.getHistogramBars = function(annots) {
     }
   }
 
-  if (firstGet == true || histogramScaling == "relative") {
+  if (firstGet === true || histogramScaling === "relative") {
     maxAnnotsPerBar = 0;
     for (i = 0; i < bars.length; i++) {
       annots = bars[i]["annots"];
@@ -2027,7 +1630,7 @@ ChimeraDbV3Viewer.prototype.getBandColorGradients = function() {
     color3 = colors[i][3];
     gradients +=
       '<linearGradient id="' + stain + '" x1="0%" y1="0%" x2="0%" y2="100%">';
-    if (stain == "gneg") {
+    if (stain === "gneg") {
       gradients +=
         '<stop offset="70%" stop-color="' + color2 + '" />' +
         '<stop offset="95%" stop-color="' + color3 + '" />' +
@@ -2089,9 +1692,9 @@ ChimeraDbV3Viewer.prototype.getTaxidFromEutils = function(callback) {
 
   d3.json(taxonomySearch, function(data) {
     taxid = data.esearchresult.idlist[0];
-    return callback(taxid)
+    return callback(taxid);
   });
-}
+};
 
 
 /**
@@ -2143,10 +1746,10 @@ ChimeraDbV3Viewer.prototype.getTaxids = function(callback) {
       }
     }
 
-    if (taxids.length == 0) {
+    if (taxids.length === 0) {
       promise = new Promise(function(resolve, reject) {
         ideo.getTaxidFromEutils(resolve);
-      })
+      });
       promise.then(function(data){
         taxid = data;
         taxids.push(taxid);
@@ -2155,11 +1758,11 @@ ChimeraDbV3Viewer.prototype.getTaxids = function(callback) {
         ideo.organisms[taxid] = {
           "commonName": "",
           "scientificName": ideo.config.organism,
-          "scientificNameAbbr": "",
-        }
+          "scientificNameAbbr": ""
+        };
         return new Promise(function(resolve, reject) {
           ideo.getAssemblyAndChromosomesFromEutils(resolve);
-        })
+        });
       })
       .then(function(asmChrArray) {
         assembly = asmChrArray[0];
@@ -2167,7 +1770,7 @@ ChimeraDbV3Viewer.prototype.getTaxids = function(callback) {
         ideo.config.chromosomes = chromosomes;
         ideo.organisms[taxid]["assemblies"] = {
           "default": assembly
-        }
+        };
 
         callback(taxids);
       });
@@ -2201,7 +1804,7 @@ ChimeraDbV3Viewer.prototype.getTaxids = function(callback) {
 
 ChimeraDbV3Viewer.prototype.isNumber = function(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
-}
+};
 
 /**
 Sorts an array of chromosomes by name, per biological convention.
@@ -2230,7 +1833,7 @@ ChimeraDbV3Viewer.prototype.sortChromosomesByName = function(chromosomes) {
     }
   });
 
-}
+};
 
 
 /**
@@ -2319,8 +1922,8 @@ ChimeraDbV3Viewer.prototype.getAssemblyAndChromosomesFromEutils = function(callb
           chromosomes.push(chromosome);
         }
 
-        chromosomes = ideo.sortChromosomesByName(chromosomes)
-        asmAndChrArray.push(chromosomes)
+        chromosomes = ideo.sortChromosomesByName(chromosomes);
+        asmAndChrArray.push(chromosomes);
         return callback(asmAndChrArray);
     });
 
@@ -2342,11 +1945,9 @@ ChimeraDbV3Viewer.prototype.initDrawChromosomes = function(bandsArray) {
 
     ideo.chromosomes[taxid] = {};
 
+// chrIndex is started by 0
     for (j = 0; j < chrs.length; j++) {
-
       bands = bandsArray[chrIndex];
-
-      chrIndex += 1;
 
       chromosome = chrs[j];
       chromosomeModel = ideo.getChromosomeModel(bands, chromosome, taxid, chrIndex);
@@ -2355,6 +1956,8 @@ ChimeraDbV3Viewer.prototype.initDrawChromosomes = function(bandsArray) {
       ideo.chromosomesArray.push(chromosomeModel);
 
       ideo.drawChromosome(chromosomeModel, chrIndex);
+
+      chrIndex += 1;
     }
 
     if (ideo.config.showBandLabels === true) {
@@ -2390,7 +1993,7 @@ ChimeraDbV3Viewer.prototype.init = function() {
 
   var promise = new Promise(function(resolve, reject) {
     ideo.getTaxids(resolve);
-  })
+  });
 
   promise.then(function(taxids) {
 
@@ -2431,12 +2034,11 @@ ChimeraDbV3Viewer.prototype.init = function() {
           ideo.bandData[data.taxid] = data.response;
           numBandDataResponses += 1;
 
-          if (numBandDataResponses == taxids.length) {
+          if (numBandDataResponses === taxids.length) {
             processBandData();
             writeContainer();
           }
         });
-
     } else {
       if (typeof chrBands !== "undefined") {
         // If bands already available,
@@ -2462,7 +2064,7 @@ ChimeraDbV3Viewer.prototype.init = function() {
 
     svgClass = "";
     if (ideo.config.showChromosomeLabels) {
-      if (ideo.config.orientation == "horizontal") {
+      if (ideo.config.orientation === "horizontal") {
         svgClass += "labeledLeft ";
       } else {
         svgClass += "labeled ";
@@ -2478,15 +2080,8 @@ ChimeraDbV3Viewer.prototype.init = function() {
 
     var ideoHeight;
 
-    if (ideo.config.orientation === "vertical") {
-      ideoHeight = ideo.config.chrHeight + 30;
-      if (ideo.config.rows > 1) {
-        ideoHeight = ideo.config.rows * (ideoHeight - 30);
-      }
-    } else {
         // Container 높이 조절하는 부분
       ideoHeight = ideo.config.chrMargin * ideo.numChromosomes + 100;
-    }
 
     var gradients = ideo.getBandColorGradients();
 
@@ -2529,7 +2124,7 @@ ChimeraDbV3Viewer.prototype.init = function() {
         taxid = taxids[i];
       }
     } else {
-      if (typeof ideo.config.taxid == "undefined") {
+      if (typeof ideo.config.taxid === "undefined") {
         ideo.config.taxid = ideo.config.taxids[0];
       }
       taxid = ideo.config.taxid;
@@ -2671,13 +2266,6 @@ function finishInit() {
       if (ideo.debug) {
         console.log("Time in showing bands: " + (t1_c - t0_c) + " ms");
       }
-
-      if (ideo.config.orientation === "vertical") {
-        for (var i = 0; i < ideo.chromosomesArray.length; i++) {
-          ideo.rotateChromosomeLabels(d3.select("#" + ideo.chromosomesArray[i].id), i);
-        }
-      }
-
     }
 
     if (ideo.config.showChromosomeLabels === true) {
