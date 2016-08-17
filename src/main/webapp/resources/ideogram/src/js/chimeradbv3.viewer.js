@@ -2332,6 +2332,14 @@ ChimeraDbV3Viewer.prototype.initDrawGeneStructure = function() {
     
     taxids = ideo.config.taxids;
 
+    chrs = Object.keys(genes);
+    var gene_length = 0;
+    for(i=0; i<chrs.length; i++) {
+        var gene = genes[chrs[i]];
+        
+        gene_length += gene.end - gene.start + 1;
+    }
+
     for (m = 0; m < taxids.length; m++) {
       taxid = taxids[m];
       chrs = ideo.config.chromosomes[taxid];
@@ -2341,12 +2349,40 @@ ChimeraDbV3Viewer.prototype.initDrawGeneStructure = function() {
         chrIndex = chrModel.chrIndex;
         
         gene = genes[chromosome];
+        length_ratio = (gene.end-gene.start + 1) / gene_length;
         
-        ideo.drawGeneStructure( chrModel, gene );
+        ideo.drawGeneStructure( chrModel, gene, length_ratio );
       }
     }
 };
 
-ChimeraDbV3Viewer.prototype.drawGeneStructure = function( chrModel, gene ) {
+ChimeraDbV3Viewer.prototype.drawGeneStructure = function( chrModel, gene, length_ratio ) {
     var ideo = this;
+    
+    container = this.config.container,
+    rect = document.querySelector(container).getBoundingClientRect();
+
+    // 유전자의 길이를 상대적으로 계산해 보여준다
+    var backbone_width = (rect.width * length_ratio) - 50;
+    
+    var start_x = 0;
+    var end_x = 0;
+    if( chrModel.chrIndex === 0 ) {
+        end_x = backbone_width;
+    }else {
+        start_x = (rect.width / 2);
+        end_x = start_x + backbone_width;
+    }
+    
+    gene_backbone = d3.select("svg")
+    .append("g")
+      .attr("id", gene.gene)
+      .attr("class", "gene-structure");
+      
+      gene_backbone.append('line')
+    .attr("class", "gene-backbone")
+    .attr('x1', start_x)
+    .attr('y1', 200)
+    .attr('x2', end_x)
+    .attr("y2", 200);
 };

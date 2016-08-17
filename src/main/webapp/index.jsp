@@ -3,6 +3,7 @@
 <head>
   <title>Human | Ideogram</title>
   <link type="text/css" rel="stylesheet" href="resources/ideogram/src/css/ideogram.css"/>
+  <link type="text/css" rel="stylesheet" href="resources/ideogram/src/css/chimerdbv3.css"/>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.1.1/d3.min.js"></script>
   <script type="text/javascript" src="resources/ideogram/src/js/es6-promise.js"></script>
   <script type="text/javascript" src="resources/ideogram/src/js/d3.promise.js"></script>
