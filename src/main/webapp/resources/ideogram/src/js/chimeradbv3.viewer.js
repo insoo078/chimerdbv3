@@ -174,8 +174,8 @@ var ChimeraDbV3Viewer = function(config, gene1, gene2) {
   
   var gene1 = JSON.parse(JSON.stringify(gene1));
   var gene2 = JSON.parse(JSON.stringify(gene2));
-  this.genes[ gene1.gene ] = gene1;
-  this.genes[ gene2.gene ] = gene2;
+  this.genes[ gene1.chromosome ] = gene1;
+  this.genes[ gene2.chromosome ] = gene2;
 
   this.init();
 };
@@ -2203,6 +2203,8 @@ function finishInit() {
         i, j, m, n;
     
     ideo.initDrawChromosomes(bandsArray);
+    
+    ideo.initDrawGeneStructure();
 
     taxids = ideo.config.taxids;
 
@@ -2320,4 +2322,31 @@ function finishInit() {
     }
 
   }
+};
+
+ChimeraDbV3Viewer.prototype.initDrawGeneStructure = function() {
+    var ideo = this;
+    
+        var chrs = ideo.chromosomes;
+    var genes = ideo.genes;
+    
+    taxids = ideo.config.taxids;
+
+    for (m = 0; m < taxids.length; m++) {
+      taxid = taxids[m];
+      chrs = ideo.config.chromosomes[taxid];
+      for (n = 0; n < chrs.length; n++) {
+        chromosome = chrs[n];
+        chrModel = ideo.chromosomes[taxid][chromosome];
+        chrIndex = chrModel.chrIndex;
+        
+        gene = genes[chromosome];
+        
+        ideo.drawGeneStructure( chrModel, gene );
+      }
+    }
+};
+
+ChimeraDbV3Viewer.prototype.drawGeneStructure = function( chrModel, gene ) {
+    var ideo = this;
 };
