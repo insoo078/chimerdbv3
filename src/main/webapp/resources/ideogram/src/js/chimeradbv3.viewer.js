@@ -1,7 +1,7 @@
 // Developed by Eric Weitz (https://github.com/eweitz)
 
 /* Constructs a prototypal ChimeraDbV3Viewer class */
-var ChimeraDbV3Viewer = function(config) {
+var ChimeraDbV3Viewer = function(config, gene1, gene2) {
 
   // Clone the config object, to allow multiple instantiations
   // without picking up prior ideogram's settings
@@ -167,8 +167,17 @@ var ChimeraDbV3Viewer = function(config) {
   this.numChromosomes = 0;
   this.bandData = {};
 
-  this.init();
+  
+  
+  // Fusion gene의 유전자 정보를 저장할 변수 선언 및 세팅  
+  this.genes = {};
+  
+  var gene1 = JSON.parse(JSON.stringify(gene1));
+  var gene2 = JSON.parse(JSON.stringify(gene2));
+  this.genes[ gene1.gene ] = gene1;
+  this.genes[ gene2.gene ] = gene2;
 
+  this.init();
 };
 
 /**
