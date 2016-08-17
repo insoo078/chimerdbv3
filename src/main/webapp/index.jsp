@@ -4,13 +4,15 @@
   <title>Human | Ideogram</title>
   <link type="text/css" rel="stylesheet" href="resources/ideogram/src/css/ideogram.css"/>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.1.1/d3.min.js"></script>
+  <script type="text/javascript" src="resources/ideogram/src/js/es6-promise.js"></script>
+  <script type="text/javascript" src="resources/ideogram/src/js/d3.promise.js"></script>
   <script type="text/javascript" src="resources/ideogram/src/js/chimeradbv3.viewer.js"></script>
 </head>
 <body>
   <h1>Human | Ideogram</h1>
   <a href=".">Back to overview</a>
   
-  <div id='chimer-seq-viewer'></div>
+  <div id='chimer-seq-viewer' style='background:green;'></div>
 
   <script type="text/javascript">
 
