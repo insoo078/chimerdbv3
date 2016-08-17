@@ -12,7 +12,7 @@
   <h1>Human | Ideogram</h1>
   <a href=".">Back to overview</a>
   
-  <div id='chimer-seq-viewer' style='background:none;'></div>
+  <div id='chimer-seq-viewer' style='background:none;border:1px solid gray;'></div>
 
   <script type="text/javascript">
 
