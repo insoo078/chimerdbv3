@@ -469,7 +469,7 @@ ChimeraDbV3Viewer.prototype.drawChromosomeLabels = function(chromosomes) {
   chrs = ideo.chromosomesArray;
 
 //  chrMargin2 = chrWidth/2 + chrMargin - 8;
-chrMargin2 = ideo.config.topMargin;
+chrMargin2 = ideo.config.topMargin + chrWidth/2 - 8;
 
     d3.selectAll(".chromosome")
        .append("text")
@@ -2303,13 +2303,7 @@ function finishInit() {
       ideo.onLoadCallback();
     }
 
-    if (!("rotatable" in ideo.config && ideo.config.rotatable === false)) {
-      d3.selectAll(".chromosome").on("click", function() {
-        ideogram.rotateAndToggleDisplay(this.id);
-      });
-    } else {
-      d3.selectAll(".chromosome").style("cursor", "default");
-    }
+     d3.selectAll(".chromosome").style("cursor", "default");
 
      } catch (e) {
        console.log(e.stack)
