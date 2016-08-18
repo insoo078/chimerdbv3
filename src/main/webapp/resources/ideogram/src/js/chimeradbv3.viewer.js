@@ -2440,10 +2440,101 @@ ChimeraDbV3Viewer.prototype.drawGeneStructure = function( chrModel, gene, length
         .append("text")
         .text(function(d) { return d.direction; });
 
+    if( 1 === 1 ) {
+        var rnas = gene.rnas;
 
+        var exon_cnt = 0;
+        for(i=0; i<rnas.length; i++) {
+            var exons = rnas[i].features;
+            exon_cnt += exons.length;
+        }
+
+        var unit_len_nt =  (backbone_width - 2*MARGIN) / (exon_cnt * 2 + 1);
+
+        for(i=0; i<rnas.length; i++) {
+            var rna = rnas[i];
+            
+            var exons = rna.features;
+
+            var previous = start_x + unit_len_nt;
+            for(j=0; j<exons.length; j++) {
+                var x1 = previous;
+                var y1 = BASE_Y - 10;
+                var width = unit_len_nt;
+
+                gene_backbone.append("rect")
+                        .style("fill", "#ff3ee8")
+                        .attr("rx", 2)
+                        .attr("ry", 2)
+                        .attr("x", x1)
+                        .attr("y", y1)
+                        .attr("width", width)
+                        .attr("height", 20);
+                
+                previous = x1 + (2*width);
+            }
+        }
+    }else if( 1 === 2) {
+        var rnas = gene.rnas;
+
+        var exon_length = 0;
+        var exon_cnt = 0;
+        for(i=0; i<rnas.length; i++) {
+            var exons = rnas[i].features;
+
+            for(j=0; j<exons.length; j++) exon_length += (exons[j].end-exons[j].start+1);
+            exon_cnt += exons.length;
+        }
+
+        var INTRON_BASES = 40;
+        exon_length += ((exon_cnt + 1) * INTRON_BASES);
+        
+        var unit_len_nt =  (backbone_width - 2*MARGIN) / exon_length;
+
+        for(i=0; i<rnas.length; i++) {
+            var rna = rnas[i];
+            
+            var exons = rna.features;
+
+            var previous = start_x;
+            for(j=0; j<exons.length; j++) {
+                var start = exons[j].start - gene.start;
+                var end = exons[j].end - gene.start;
+
+                var x1 = (INTRON_BASES * unit_len_nt) + previous;
+                var y1 = BASE_Y - 10;
+                var width = (end-start+1) * unit_len_nt;
+                
+                previous = x1 + width;
+
+                gene_backbone.append("rect")
+                        .style("fill", "#ff3ee8")
+                        .attr("rx", 2)
+                        .attr("ry", 2)
+                        .attr("x", x1)
+                        .attr("y", y1)
+                        .attr("width", width)
+                        .attr("height", 20)
+                        .attr("len", (end-start+1));
+            }
+        }
+    }else {
+        var rnas = gene.rnas;
+
+//        var exon_length = 0;
+//        var exon_cnt = 0;
+//        for(i=0; i<rnas.length; i++) {
+//            var exons = rnas[i].features;
+//
+//            for(j=0; j<exons.length; j++) exon_length += (exons[j].end-exons[j].start+1);
+//            exon_cnt += exons.length;
+//        }
+//
+//        var INTRON_BASES = 40;
+//        exon_length += ((exon_cnt + 1) * INTRON_BASES);
+//        
         var unit_len_nt = (backbone_width - 2*MARGIN) / (gene.end-gene.start+1);
 
-        var rnas = gene.rnas;
         for(i=0; i<rnas.length; i++) {
             var rna = rnas[i];
             
@@ -2464,9 +2555,13 @@ ChimeraDbV3Viewer.prototype.drawGeneStructure = function( chrModel, gene, length
                         .attr("x", x1)
                         .attr("y", y1)
                         .attr("width", width)
-                        .attr("height", 20);
+                        .attr("height", 20)
+                        .attr("len", (end-start+1));
             }
         }
+    }
+        
+        console.log( gene_backbone );
         
         var startPx1 = ideo.convertBpToPx(chrModel, gene.start);
         var stopPx1 = ideo.convertBpToPx(chrModel, gene.end);
