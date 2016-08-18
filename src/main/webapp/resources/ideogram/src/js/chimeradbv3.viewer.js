@@ -2441,6 +2441,7 @@ ChimeraDbV3Viewer.prototype.drawGeneStructure = function( chrModel, gene, length
         .text(function(d) { return d.direction; });
 
     if( 1 === 1 ) {
+        // exon과 intron을 고정으로 그려주는 부분
         var rnas = gene.rnas;
 
         var exon_cnt = 0;
@@ -2463,10 +2464,10 @@ ChimeraDbV3Viewer.prototype.drawGeneStructure = function( chrModel, gene, length
                 }
             }
 
-            unique_exon_set = Object.keys(unique_exon_set).map(function(k) { return unique_exon_set[k] });
+            unique_exon_set = Object.keys(unique_exon_set).map(function(k) { return unique_exon_set[k]; });
             
             unit_len_nt =  (backbone_width - 2*MARGIN) / (unique_exon_set.length * 2 + 1);
-            
+
             var previous = start_x + unit_len_nt;
             for(j=0; j<unique_exon_set.length; j++) {
                 var x1 = previous;
@@ -2482,8 +2483,10 @@ ChimeraDbV3Viewer.prototype.drawGeneStructure = function( chrModel, gene, length
                         .attr("width", width)
                         .attr("height", 20);
                 
-                previous = x1 + (2*width);
+                previous = (x1 + width) + unit_len_nt;
             }
+            console.log( (width * unique_exon_set.length) + (width * (unique_exon_set.length+1)) );
+            console.log( (backbone_width - 2*MARGIN) );
         }else {
             var rna = rnas[0];
             
@@ -2504,10 +2507,11 @@ ChimeraDbV3Viewer.prototype.drawGeneStructure = function( chrModel, gene, length
                         .attr("width", width)
                         .attr("height", 20);
                 
-                previous = x1 + (2*width);
+                previous = (x1 + width) + unit_len_nt;
             }
         }
     }else if( 1 === 2) {
+        // exon의 길이를 비례대로 그려주는 부분
         var rnas = gene.rnas;
 
         var exon_length = 0;
@@ -2552,6 +2556,7 @@ ChimeraDbV3Viewer.prototype.drawGeneStructure = function( chrModel, gene, length
             }
         }
     }else {
+        // exon, intron을 실제 길이 비율대로 그려주는 부분
         var rnas = gene.rnas;
 
         var unit_len_nt = (backbone_width - 2*MARGIN) / (gene.end-gene.start+1);
