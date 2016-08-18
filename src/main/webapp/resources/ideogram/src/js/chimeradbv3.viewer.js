@@ -921,6 +921,8 @@ ChimeraDbV3Viewer.prototype.convertBpToPx = function(chr, bp) {
 
   for (i = 0; i < chr.bands.length; i++) {
     band = chr.bands[i];
+    
+//    console.log( bp + " " + band.bp.start + " " + band.bp.stop );
     if (bp >= band.bp.start && bp <= band.bp.stop) {
 
       bpToIscnScale = (band.iscn.stop - band.iscn.start)/(band.bp.stop - band.bp.start);
@@ -2363,15 +2365,19 @@ ChimeraDbV3Viewer.prototype.drawGeneStructure = function( chrModel, gene, length
     rect = document.querySelector(container).getBoundingClientRect();
 
     // 유전자의 길이를 상대적으로 계산해 보여준다
-    var backbone_width = (rect.width * length_ratio) - 50;
+    var backbone_width = (ideo.config.chrHeight) * length_ratio;
     
+    var BASE_Y = 200;
+    
+    var MARGIN = 50;
     var start_x = 0;
     var end_x = 0;
     if( chrModel.chrIndex === 0 ) {
-        end_x = backbone_width;
+        start_x = MARGIN;
+        end_x = backbone_width - MARGIN;
     }else {
-        start_x = (rect.width / 2);
-        end_x = start_x + backbone_width;
+        start_x += (ideo.config.chrHeight * (1-length_ratio)) + MARGIN;
+        end_x = start_x + backbone_width - MARGIN;
     }
     
     gene_backbone = d3.select("svg")
@@ -2382,7 +2388,124 @@ ChimeraDbV3Viewer.prototype.drawGeneStructure = function( chrModel, gene, length
       gene_backbone.append('line')
     .attr("class", "gene-backbone")
     .attr('x1', start_x)
-    .attr('y1', 200)
+    .attr('y1', BASE_Y)
     .attr('x2', end_x)
-    .attr("y2", 200);
+    .attr("y2", BASE_Y);
+    
+    var tmp = [{"point":gene.start, "x":start_x, "direction":"5'"}, {"point":gene.end, "x":end_x, "direction":"3'"}];
+  
+    gene_backbone.append("line")
+            .attr("style", "stroke:#aaa;stroke-width:0.5;")
+            .attr("x1", start_x)
+            .attr("y1", BASE_Y)
+            .attr("x2", start_x)
+            .attr("y2", BASE_Y + 10);
+   
+    gene_backbone.append("line")
+            .attr("style", "stroke:#aaa;stroke-width:0.5;")
+            .attr("x1", end_x)
+            .attr("y1", BASE_Y)
+            .attr("x2", end_x)
+            .attr("y2", BASE_Y + 10);
+    
+    gene_backbone.selectAll(".gene-structure-Label")
+      .data(tmp)
+      .enter()
+      .append("g")
+        .attr("class", function(i) { return "gene-structure-Label bsbsl-" + i;  })
+        .attr("transform", function(d) {
+
+          var x, y;
+
+          x = d.x;
+          y = BASE_Y + 20;
+          return "translate(" + x + "," + y + ")";
+        })
+        .append("text")
+        .text(function(d) { return d.point; });
+
+    gene_backbone.selectAll(".gene-structure-dir-Label")
+      .data(tmp)
+      .enter()
+      .append("g")
+        .attr("class", function(i) { return "gene-structure-dir-Label bsbsl-" + i;  })
+        .attr("transform", function(d) {
+
+          var x, y;
+
+          x = d.x;
+          y = BASE_Y - 20;
+          return "translate(" + x + "," + y + ")";
+        })
+        .append("text")
+        .text(function(d) { return d.direction; });
+
+
+        var unit_len_nt = (backbone_width - 2*MARGIN) / (gene.end-gene.start+1);
+
+        var rnas = gene.rnas;
+        for(i=0; i<rnas.length; i++) {
+            var rna = rnas[i];
+            
+            var exons = rna.features;
+
+            for(j=0; j<exons.length; j++) {
+                var start = exons[j].start - gene.start;
+                var end = exons[j].end - gene.start;
+                
+                var x1 = start_x + (start*unit_len_nt);
+                var y1 = BASE_Y - 10;
+                var width = (end-start+1) * unit_len_nt;
+
+                gene_backbone.append("rect")
+                        .style("fill", "#ff3ee8")
+                        .attr("rx", 2)
+                        .attr("ry", 2)
+                        .attr("x", x1)
+                        .attr("y", y1)
+                        .attr("width", width)
+                        .attr("height", 20);
+            }
+        }
+        
+        var startPx1 = ideo.convertBpToPx(chrModel, gene.start);
+        var stopPx1 = ideo.convertBpToPx(chrModel, gene.end);
+
+        var aa = d3.selectAll(".chromosome").each(function(d, i) {
+          if( this.id.startsWith("chr" + gene.chromosome) ){
+              var rect = this.getBoundingClientRect();
+              
+
+            var y1 = rect.height;
+            var y2 = BASE_Y - 30;
+            var startPx2 = start_x;
+            var stopPx2 = end_x;
+            
+                if( i > 0) {
+                    startPx2 = startPx1;
+                    stopPx2 = stopPx1;
+                    
+                    y2 = rect.top;
+                    y1 = BASE_Y + 30;
+                    startPx1 = start_x;
+                    stopPx1 = end_x;
+                }
+                  
+                  gene_backbone.append("line")
+                    .attr("style", "stroke:#4f3;stroke-width:0.5;")
+                    .attr("x1", startPx1)
+                    .attr("y1", y1)
+                    .attr("x2", startPx2)
+                    .attr("y2", y2);
+            
+                gene_backbone.append("line")
+                    .attr("style", "stroke:#4f3;stroke-width:0.5;")
+                    .attr("x1", stopPx1)
+                    .attr("y1", y1)
+                    .attr("x2", stopPx2)
+                    .attr("y2", y2);
+            }
+        });
+        
+//        console.log( gene_backbone );
 };
