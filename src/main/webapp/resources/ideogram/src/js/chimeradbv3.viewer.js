@@ -2451,8 +2451,41 @@ ChimeraDbV3Viewer.prototype.drawGeneStructure = function( chrModel, gene, length
 
         var unit_len_nt =  (backbone_width - 2*MARGIN) / (exon_cnt * 2 + 1);
 
-        for(i=0; i<rnas.length; i++) {
-            var rna = rnas[i];
+        if( rnas.length > 1 ) {
+            var unique_exon_set = {};
+            for(i=0; i<rnas.length; i++) {
+                var exons = rnas[i].features;
+                for(j=0; j<exons.length; j++) {
+                    var key = exons[j].start+"-"+exons[j].end;
+                    if( !unique_exon_set.hasOwnProperty() ){
+                        unique_exon_set[key] = exons[j];
+                    }
+                }
+            }
+
+            unique_exon_set = Object.keys(unique_exon_set).map(function(k) { return unique_exon_set[k] });
+            
+            unit_len_nt =  (backbone_width - 2*MARGIN) / (unique_exon_set.length * 2 + 1);
+            
+            var previous = start_x + unit_len_nt;
+            for(j=0; j<unique_exon_set.length; j++) {
+                var x1 = previous;
+                var y1 = BASE_Y - 10;
+                var width = unit_len_nt;
+
+                gene_backbone.append("rect")
+                        .style("fill", "#ff3ee8")
+                        .attr("rx", 2)
+                        .attr("ry", 2)
+                        .attr("x", x1)
+                        .attr("y", y1)
+                        .attr("width", width)
+                        .attr("height", 20);
+                
+                previous = x1 + (2*width);
+            }
+        }else {
+            var rna = rnas[0];
             
             var exons = rna.features;
 
@@ -2521,18 +2554,6 @@ ChimeraDbV3Viewer.prototype.drawGeneStructure = function( chrModel, gene, length
     }else {
         var rnas = gene.rnas;
 
-//        var exon_length = 0;
-//        var exon_cnt = 0;
-//        for(i=0; i<rnas.length; i++) {
-//            var exons = rnas[i].features;
-//
-//            for(j=0; j<exons.length; j++) exon_length += (exons[j].end-exons[j].start+1);
-//            exon_cnt += exons.length;
-//        }
-//
-//        var INTRON_BASES = 40;
-//        exon_length += ((exon_cnt + 1) * INTRON_BASES);
-//        
         var unit_len_nt = (backbone_width - 2*MARGIN) / (gene.end-gene.start+1);
 
         for(i=0; i<rnas.length; i++) {
@@ -2560,8 +2581,6 @@ ChimeraDbV3Viewer.prototype.drawGeneStructure = function( chrModel, gene, length
             }
         }
     }
-        
-        console.log( gene_backbone );
         
         var startPx1 = ideo.convertBpToPx(chrModel, gene.start);
         var stopPx1 = ideo.convertBpToPx(chrModel, gene.end);
