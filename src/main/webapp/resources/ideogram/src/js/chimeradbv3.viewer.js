@@ -2473,14 +2473,13 @@ ChimeraDbV3Viewer.prototype.drawGeneStructure = function( chrModel, gene, length
 
         var aa = d3.selectAll(".chromosome").each(function(d, i) {
           if( this.id.startsWith("chr" + gene.chromosome) ){
-              var rect = this.getBoundingClientRect();
-              
+              var rect = getBoundary(this.getBoundingClientRect(), getVpPos(this) );
 
-            var y1 = rect.height;
+            var y1 = rect.bottom;
             var y2 = BASE_Y - 30;
             var startPx2 = start_x;
             var stopPx2 = end_x;
-            
+                        
                 if( i > 0) {
                     startPx2 = startPx1;
                     stopPx2 = stopPx1;
@@ -2490,22 +2489,51 @@ ChimeraDbV3Viewer.prototype.drawGeneStructure = function( chrModel, gene, length
                     startPx1 = start_x;
                     stopPx1 = end_x;
                 }
-                  
-                  gene_backbone.append("line")
-                    .attr("style", "stroke:#4f3;stroke-width:0.5;")
-                    .attr("x1", startPx1)
-                    .attr("y1", y1)
-                    .attr("x2", startPx2)
-                    .attr("y2", y2);
+                
+            var path1 = "M" + startPx1 + " " + y1;
+            path1 += " L" + startPx1 + " " + (y1+20);
+            path1 += " L" + startPx2 + " " + (y2-20);
+            path1 += " L" + startPx2 + " " + y2;
+            path1 += " ";
             
-                gene_backbone.append("line")
+            var path2 = "M" + stopPx1 + " " + y1;
+            path2 += " L" + stopPx1 + " " + (y1+20);
+            path2 += " L" + stopPx2 + " " + (y2-20);
+            path2 += " L" + stopPx2 + " " + y2;
+            path2 += " ";
+
+            gene_backbone.append("path")
+                    .attr("d", path1 )
                     .attr("style", "stroke:#4f3;stroke-width:0.5;")
-                    .attr("x1", stopPx1)
-                    .attr("y1", y1)
-                    .attr("x2", stopPx2)
-                    .attr("y2", y2);
+                    .attr("fill", "none");
+            
+            
+            gene_backbone.append("path")
+                    .attr("d", path2 )
+                    .attr("style", "stroke:#4f3;stroke-width:0.5;")
+                    .attr("fill", "none");
             }
         });
         
 //        console.log( gene_backbone );
 };
+
+function getBoundary(base, el) {
+    return {
+        top: base.top - el.top - 15,
+//        top: base.top - el.top,
+        left: base.left - el.left,
+        width: base.width,
+//        bottom: base.bottom - el.top,
+        bottom: base.bottom - el.top - 15,
+        height: base.height,
+        right: base.right - el.left
+    };
+}
+
+function getVpPos(el) {
+    if(el.parentNode.nodeName === 'svg') {
+        return el.parentNode.getBoundingClientRect();
+    }
+    return getVpPos(el.parentNode);
+}
