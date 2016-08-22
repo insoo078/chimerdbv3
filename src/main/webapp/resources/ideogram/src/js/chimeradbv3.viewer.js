@@ -526,6 +526,7 @@ chrMargin2 = ideo.config.topMargin + chrWidth/2 - 8;
 * Stalks are small lines that visually connect labels to their bands.
 */
 ChimeraDbV3Viewer.prototype.drawBandLabels = function(chromosomes, chrNos) {
+
   var i, chr, chrs, taxid, ideo;
 
   ideo = this;
@@ -1870,7 +1871,7 @@ ChimeraDbV3Viewer.prototype.sortChromosomesByName = function(chromosomes) {
     }
   });
 
-}
+};
 
 
 /**
